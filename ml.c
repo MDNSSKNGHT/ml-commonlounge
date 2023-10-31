@@ -4,6 +4,8 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 static const float dataset[][2] = {
 	{ 6.65f, 30.7f },
@@ -36,6 +38,11 @@ static inline float predict(float x1, float w1, float b)
 	return w1 * x1 + b;
 }
 
+static inline float randf()
+{
+	return (float) rand() / (float) RAND_MAX;
+}
+
 /* Calculate cost given model parameters,
  * make predictions for each data (x, ytrue) and
  * calculate squared error */
@@ -56,19 +63,36 @@ static float cost_function(float w1, float b)
 
 int main(void)
 {
-	/* Bias and weight (try out various values!) */
-	float b = 15.f;
-	float w1 = 3.f;
+	srand(time(0));
+
+	float b = randf();
+	float w1 = randf();
 	
-	float cost = cost_function(w1, b);
+	float it = 1000 * 1000;
+	float n = 0.001;
 
-	printf("Value of cost function = %f\n", cost);
+	for (size_t i = 0; i < it; ++i) {
+		for (size_t j = 0; j < data_len; ++j) {
+			float x = dataset[j][0];
+			float y = dataset[j][1];
 
-	for (size_t i = 0; i < data_len; ++i) {
-		float x = dataset[i][0];
+			printf("%lu\t w1 = %f, b = %f, c = %f\n", i, w1, b, cost_function(w1, b));
 
-		printf("%lu\tpredict(%f) = %f\n", i, x, predict(x, w1, b));
+			float dw = (predict(x, w1, b) - y) * x;
+			float db = (predict(x, w1, b) - y);
+
+			/* printf("dw = %f, db = %f\n", dw, db); */
+
+			b -= n * db;
+			w1 -= n * dw;
+		}
 	}
+
+	/* for (size_t i = 0; i < data_len; ++i) { */
+	/* 	float x = dataset[i][0]; */
+	/*  */
+	/* 	printf("%lu\tpredict(%f) = %f\n", i, x, predict(x, w1, b)); */
+	/* } */
 }
 
 
